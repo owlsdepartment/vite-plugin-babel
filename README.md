@@ -51,7 +51,7 @@ By default, babel is run only for JS/JSX files. You can change that vie `filter`
 
 ## Tips
 
-Vite team didn't enabled it by default, because they wanted to keep dev environment as fast as possible. Because of that, we recommend to only include those Babel plugins you really need. Best option is via `babelConfig.plugin` field and disable usage of babel config file, ex.:
+Vite team didn't enabled it by default, because they wanted to keep dev environment as fast as possible. Because of that, we recommend to only include those Babel plugins you really need. You can use option `babelConfig.plugin` and disable usage of babel config file, ex.:
 
 ```js
 babelDev({
@@ -62,6 +62,8 @@ babelDev({
     }
 })
 ```
+
+or just use `.babelrc.json` that will be also used during build process.
 
 __NOTE:__ Any babel plugins and presets need to be installed seperately and are not included with this package.
 
