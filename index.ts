@@ -3,19 +3,20 @@ import { Plugin } from 'vite';
 
 import { esbuildPluginBabel } from './esbuildBabel';
 
-export interface BabelDevOptions {
+export interface BabelPluginOptions {
     filter?: RegExp;
     babelConfig?: TransformOptions;
+	apply?: 'serve' | 'build';
 }
 
 const DEFAULT_FILTER = /\.jsx?$/;
 
-const babelDevPlugin = ({ babelConfig = {}, filter = DEFAULT_FILTER }: BabelDevOptions = {}): Plugin => {
+const babelPlugin = ({ babelConfig = {}, filter = DEFAULT_FILTER, apply }: BabelPluginOptions = {}): Plugin => {
 	return {
-		name: 'babel-dev-plugin',
+		name: 'babel-plugin',
 
+		apply,
 		enforce: 'pre',
-		apply: 'serve',
 
 		config() {
 			return {
@@ -24,9 +25,7 @@ const babelDevPlugin = ({ babelConfig = {}, filter = DEFAULT_FILTER }: BabelDevO
 						plugins: [
 							esbuildPluginBabel({
 								filter,
-								config: {
-									...babelConfig,
-								},
+								config: { ...babelConfig },
 							}),
 						],
 					},
@@ -40,6 +39,7 @@ const babelDevPlugin = ({ babelConfig = {}, filter = DEFAULT_FILTER }: BabelDevO
 			if (!shouldTransform) return;
 
 			const { code: output, map } = babel.transformSync(code, {
+				filename: id,
 				...babelConfig,
 			}) ?? {};
 
@@ -51,5 +51,5 @@ const babelDevPlugin = ({ babelConfig = {}, filter = DEFAULT_FILTER }: BabelDevO
 	};
 };
 
-export default babelDevPlugin;
+export default babelPlugin;
 export * from './esbuildBabel';

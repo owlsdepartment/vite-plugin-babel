@@ -21,8 +21,8 @@ export const esbuildPluginBabel = (options: ESBuildPluginBabelOptions = {}): Plu
 
 		const transformContents = ({ args, contents }: { args: OnLoadArgs, contents: string }) => {
 			const babelOptions = babel.loadOptions({
-				...config,
 				filename: args.path,
+				...config,
 				caller: {
 					name: 'esbuild-plugin-babel',
 					supportsStaticESM: true,
