@@ -11,7 +11,7 @@
     "clean": "rm -rf dist",
     "dev": "rollup -c --watch",
     "build": "rollup -c",
-    "prepare": "npm run build"
+    "prepare": "npm run clean && npm run build"
   },
   "repository": {
     "type": "git",
