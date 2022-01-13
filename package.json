@@ -1,7 +1,7 @@
 {
-  "name": "vite-plugin-babel-dev",
+  "name": "vite-plugin-babel",
   "version": "1.0.2",
-  "description": "Runs babel during dev serve in Vite",
+  "description": "Runs Babel in Vite during all commands",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -15,14 +15,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/owlsdepartment/vite-plugin-babel-dev.git"
+    "url": "git+https://github.com/owlsdepartment/vite-plugin-babel.git"
   },
   "author": "Miłosz Mandowski",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/owlsdepartment/vite-plugin-babel-dev/issues"
+    "url": "https://github.com/owlsdepartment/vite-plugin-babel/issues"
   },
-  "homepage": "https://github.com/owlsdepartment/vite-plugin-babel-dev#readme",
+  "homepage": "https://github.com/owlsdepartment/vite-plugin-babel#readme",
   "keywords": [
     "vite-plugin",
     "vite",
