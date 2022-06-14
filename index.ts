@@ -5,10 +5,10 @@ import { Plugin } from 'vite';
 import { esbuildPluginBabel } from './esbuildBabel';
 
 export interface BabelPluginOptions {
-  apply?: 'serve' | 'build';
-  babelConfig?: TransformOptions;
-  filter?: RegExp;
-  loader?: Loader | ((path: string) => Loader);
+	apply?: 'serve' | 'build';
+	babelConfig?: TransformOptions;
+	filter?: RegExp;
+	loader?: Loader | ((path: string) => Loader);
 }
 
 const DEFAULT_FILTER = /\.jsx?$/;
@@ -28,7 +28,7 @@ const babelPlugin = ({ babelConfig = {}, filter = DEFAULT_FILTER, apply, loader 
 							esbuildPluginBabel({
 								config: { ...babelConfig },
 								filter,
-                loader,
+								loader,
 							}),
 						],
 					},
@@ -36,7 +36,7 @@ const babelPlugin = ({ babelConfig = {}, filter = DEFAULT_FILTER, apply, loader 
 			};
 		},
 
-    transform(code, id) {
+		transform(code, id) {
 			const shouldTransform = filter.test(id);
 
 			if (!shouldTransform) return;

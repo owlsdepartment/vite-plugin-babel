@@ -11,7 +11,7 @@ export interface ESBuildPluginBabelOptions {
 	config?: TransformOptions;
 	filter?: RegExp;
 	namespace?: string;
-  loader?: Loader | ((path: string) => Loader);
+	loader?: Loader | ((path: string) => Loader);
 }
 
 export const esbuildPluginBabel = (options: ESBuildPluginBabelOptions = {}): Plugin => ({
@@ -20,12 +20,12 @@ export const esbuildPluginBabel = (options: ESBuildPluginBabelOptions = {}): Plu
 	setup(build) {
 		const { filter = /.*/, namespace = '', config = {}, loader } = options;
 
-    const resolveLoader = (args: OnLoadArgs): Loader | undefined => {
-      if (typeof loader === 'function') {
-        return loader(args.path);
-      }
-      return loader;
-    };
+		const resolveLoader = (args: OnLoadArgs): Loader | undefined => {
+			if (typeof loader === 'function') {
+				return loader(args.path);
+			}
+			return loader;
+		};
 
 		const transformContents = async (args: OnLoadArgs, contents: string): Promise<OnLoadResult> => {
 			const babelOptions = babel.loadOptions({
@@ -38,8 +38,8 @@ export const esbuildPluginBabel = (options: ESBuildPluginBabelOptions = {}): Plu
 			}) as TransformOptions;
 
 			if (!babelOptions) {
-        return { contents, loader: resolveLoader(args) };
-      }
+				return { contents, loader: resolveLoader(args) };
+			}
 
 			if (babelOptions.sourceMaps) {
 				babelOptions.sourceFileName = path.relative(process.cwd(), args.path);
@@ -47,10 +47,12 @@ export const esbuildPluginBabel = (options: ESBuildPluginBabelOptions = {}): Plu
 
 			return new Promise((resolve, reject) => {
 				babel.transform(contents, babelOptions, (error, result) => {
-					error ? reject(error) : resolve({
-            contents: result?.code ?? '',
-            loader: resolveLoader(args),
-          });
+					error
+						? reject(error)
+						: resolve({
+							contents: result?.code ?? '',
+							loader: resolveLoader(args),
+						});
 				});
 			});
 		};
