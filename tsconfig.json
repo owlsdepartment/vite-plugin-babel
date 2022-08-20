@@ -15,5 +15,5 @@
         "types": ["node"]
     },
 
-    "include": ["index.ts"]
+    "include": ["index.ts", "rollup.config.ts"]
 }
