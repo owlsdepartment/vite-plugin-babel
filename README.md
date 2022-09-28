@@ -49,6 +49,7 @@ By default, babel is run for JS/JSX files. You can change that vie `filter` opti
 | `loader` | `Loader` or `(path: string) => Loader` | `undefined` | This tells esbuild how to interpret the contents after babel's transformation. For example, the js loader interprets the contents as JavaScript and the css loader interprets the contents as CSS. The loader defaults to js if it's not specified. See the [Content Types](https://esbuild.github.io/content-types) page for a complete list of all built-in loaders. |
 
 ## Tips
+
 Vite team didn't enabled and included Babel by default, because they wanted to keep expirience as fast as possible and esbuild can already do a lot of things, you would probably do with Babel. Because of that, we recommend to only include those Babel plugins you really need. You can use option `babelConfig.plugin` and disable usage of Babel config file, ex.:
 
 ```js
@@ -56,7 +57,7 @@ babel({
     babelConfig: {
         babelrc: false,
         configFile: false,
-        plugin: ['@babel/plugin-proposal-decorators']
+        plugins: ['@babel/plugin-proposal-decorators']
     }
 })
 ```
@@ -68,9 +69,11 @@ __NOTE:__ Any babel plugins and presets need to be installed seperately and are 
 ## Troubleshooting
 
 #### [ERROR] The JSX syntax extension is not currently enabled
+
 This usually happens when you're using this plugin to only transform part of a `.jsx` file (such as decorators), and leaving the JSX syntax untouched. By default, esbuild interprets contents as `.js`, so you'll need to specify the loader esbuild should use.
 
 Example:
+
 ```js
 import { extname } from 'path';
 // ...
@@ -78,7 +81,7 @@ babel({
     babelConfig: {
         babelrc: false,
         configFile: false,
-        plugin: ['@babel/plugin-proposal-decorators'],
+        plugins: ['@babel/plugin-proposal-decorators'],
         
         // uses the jsx loader for .jsx files
         loader: path => {
