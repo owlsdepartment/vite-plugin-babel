@@ -6,7 +6,7 @@ Run Babel during any Vite command, also during serve.
 
 Most Vite plugins runs Babel only during `build`, not `serve`, and only other possible way to do this is via [@vitejs/plugin-react](https://www.npmjs.com/package/@vitejs/plugin-react). ESBuild is awesome tool, but doesn't support some experimental features, like decorators ([issue #2349](https://github.com/vitejs/vite/issues/2349)) or class instance fields, out of box. You can use them in TypeScript, but not pure JS. This plugin was made to enable usage of such features and runs babel during `optimizeDeps`, `dev` and `build` stages, but it can be configured.
 
-## Instalation
+## Installation
 
 ```bash
 # yarn
