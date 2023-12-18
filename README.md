@@ -46,6 +46,8 @@ By default, babel is run for JS/JSX files. You can change that vie `filter` opti
 | `apply` | `serve` or `build` | `undefined` | Limits plugin usage to only build or only serve. If not specified, will be run during both cycles. |
 | `babelConfig` | `object` | `{}` | [Babel Transform Options](https://babeljs.io/docs/en/options) |
 | `filter` | `RegExp` | `/\.jsx?$/` | Which files is babel applied to. By default, it's js/jsx files. |
+| `include` | `string \| RegExp \| Array<string\|RegExp>)` | `undefined` | which files to include. If omitted, all are included |
+| `exlucde` | `string \| RegExp \| Array<string\|RegExp>)` | `undefined` | which files to exlucde. If used with `include`, it will have higher priority and can exclude files, that match `include` pattern |
 | `loader` | `Loader` or `(path: string) => Loader` | `undefined` | This tells esbuild how to interpret the contents after babel's transformation. For example, the js loader interprets the contents as JavaScript and the css loader interprets the contents as CSS. The loader defaults to js if it's not specified. See the [Content Types](https://esbuild.github.io/content-types) page for a complete list of all built-in loaders. |
 
 ## Tips

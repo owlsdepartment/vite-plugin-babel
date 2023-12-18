@@ -5,20 +5,21 @@ import path from 'path';
 
 /**
  * Original: https://github.com/nativew/esbuild-plugin-babel
- * Copied, because there was a problem with `type: "module"` in `package.json`
+ * Copied and customized, because there was a problem with `type: "module"` in `package.json`
  */
 export interface ESBuildPluginBabelOptions {
 	config?: TransformOptions;
 	filter?: RegExp;
+	customFilter: (id: unknown) => boolean
 	namespace?: string;
 	loader?: Loader | ((path: string) => Loader);
 }
 
-export const esbuildPluginBabel = (options: ESBuildPluginBabelOptions = {}): Plugin => ({
+export const esbuildPluginBabel = (options: ESBuildPluginBabelOptions): Plugin => ({
 	name: 'babel',
 
 	setup(build) {
-		const { filter = /.*/, namespace = '', config = {}, loader } = options;
+		const { filter = /.*/, namespace = '', config = {}, loader, customFilter } = options;
 
 		const resolveLoader = (args: OnLoadArgs): Loader | undefined => {
 			if (typeof loader === 'function') {
@@ -54,7 +55,7 @@ export const esbuildPluginBabel = (options: ESBuildPluginBabelOptions = {}): Plu
 			};
 
 		build.onLoad({ filter: /.*/, namespace }, async args => {
-			const shouldTransform = filter.test(args.path);
+			const shouldTransform = customFilter(args.path) && filter.test(args.path);
 
 			if (!shouldTransform) return;
 

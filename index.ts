@@ -1,6 +1,6 @@
 import babel, { TransformOptions } from '@babel/core';
 import { Loader } from 'esbuild';
-import { Plugin } from 'vite';
+import { createFilter, FilterPattern, Plugin } from 'vite';
 
 import { esbuildPluginBabel } from './esbuildBabel';
 
@@ -8,12 +8,23 @@ export interface BabelPluginOptions {
 	apply?: 'serve' | 'build';
 	babelConfig?: TransformOptions;
 	filter?: RegExp;
+	include?: FilterPattern
+	exclude?: FilterPattern
 	loader?: Loader | ((path: string) => Loader);
 }
 
 const DEFAULT_FILTER = /\.jsx?$/;
 
-const babelPlugin = ({ babelConfig = {}, filter = DEFAULT_FILTER, apply, loader }: BabelPluginOptions = {}): Plugin => {
+const babelPlugin = ({
+	babelConfig = {},
+	filter = DEFAULT_FILTER,
+	include,
+	exclude,
+	apply,
+	loader
+}: BabelPluginOptions = {}): Plugin => {
+	const customFilter = createFilter(include, exclude)
+
 	return {
 		name: 'babel-plugin',
 
@@ -27,6 +38,7 @@ const babelPlugin = ({ babelConfig = {}, filter = DEFAULT_FILTER, apply, loader 
 						plugins: [
 							esbuildPluginBabel({
 								config: { ...babelConfig },
+								customFilter,
 								filter,
 								loader,
 							}),
@@ -37,7 +49,7 @@ const babelPlugin = ({ babelConfig = {}, filter = DEFAULT_FILTER, apply, loader 
 		},
 
 		transform(code, id) {
-			const shouldTransform = filter.test(id);
+			const shouldTransform = customFilter(id) && filter.test(id);
 
 			if (!shouldTransform) return;
 
