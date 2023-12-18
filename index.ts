@@ -41,15 +41,9 @@ const babelPlugin = ({ babelConfig = {}, filter = DEFAULT_FILTER, apply, loader 
 
 			if (!shouldTransform) return;
 
-			const { code: output, map } = babel.transformSync(code, {
-				filename: id,
-				...babelConfig,
-			}) ?? {};
-
-			return {
-				code: output ?? '',
-				map,
-			};
+			return babel
+				.transformAsync(code, { filename: id, ...babelConfig })
+				.then((result) => ({ code: result?.code ?? '', map: result?.map }));
 		},
 	};
 };

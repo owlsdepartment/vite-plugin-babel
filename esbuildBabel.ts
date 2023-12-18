@@ -45,17 +45,13 @@ export const esbuildPluginBabel = (options: ESBuildPluginBabelOptions = {}): Plu
 				babelOptions.sourceFileName = path.relative(process.cwd(), args.path);
 			}
 
-			return new Promise((resolve, reject) => {
-				babel.transform(contents, babelOptions, (error, result) => {
-					error
-						? reject(error)
-						: resolve({
-							contents: result?.code ?? '',
-							loader: resolveLoader(args),
-						});
-				});
-			});
-		};
+			return babel
+				.transformAsync(contents, babelOptions)
+				.then((result) => ({
+					contents: result?.code ?? '',
+					loader: resolveLoader(args),
+				}));
+			};
 
 		build.onLoad({ filter: /.*/, namespace }, async args => {
 			const shouldTransform = filter.test(args.path);
