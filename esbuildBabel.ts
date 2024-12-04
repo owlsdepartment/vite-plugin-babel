@@ -2,6 +2,7 @@ import babel, { TransformOptions } from '@babel/core';
 import { Loader, Plugin, OnLoadArgs, OnLoadResult } from 'esbuild';
 import fs from 'fs';
 import path from 'path';
+import { Filter, testFilter } from './filter';
 
 /**
  * Original: https://github.com/nativew/esbuild-plugin-babel
@@ -9,7 +10,7 @@ import path from 'path';
  */
 export interface ESBuildPluginBabelOptions {
 	config?: TransformOptions;
-	filter?: RegExp;
+	filter?: Filter;
 	customFilter: (id: unknown) => boolean
 	namespace?: string;
 	loader?: Loader | ((path: string) => Loader);
@@ -55,7 +56,7 @@ export const esbuildPluginBabel = (options: ESBuildPluginBabelOptions): Plugin =
 			};
 
 		build.onLoad({ filter: /.*/, namespace }, async args => {
-			const shouldTransform = customFilter(args.path) && filter.test(args.path);
+			const shouldTransform = customFilter(args.path) && testFilter(filter, args.path);
 
 			if (!shouldTransform) return;
 

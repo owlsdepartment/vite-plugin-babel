@@ -3,11 +3,12 @@ import { Loader } from 'esbuild';
 import { createFilter, FilterPattern, Plugin } from 'vite';
 
 import { esbuildPluginBabel } from './esbuildBabel';
+import { Filter, testFilter } from './filter'
 
 export interface BabelPluginOptions {
 	apply?: 'serve' | 'build';
 	babelConfig?: TransformOptions;
-	filter?: RegExp;
+	filter?: Filter;
 	include?: FilterPattern
 	exclude?: FilterPattern
 	loader?: Loader | ((path: string) => Loader);
@@ -49,7 +50,7 @@ const babelPlugin = ({
 		},
 
 		transform(code, id) {
-			const shouldTransform = customFilter(id) && filter.test(id);
+			const shouldTransform = customFilter(id) && testFilter(filter, id);
 
 			if (!shouldTransform) return;
 
@@ -62,3 +63,4 @@ const babelPlugin = ({
 
 export default babelPlugin;
 export * from './esbuildBabel';
+export type { Filter }
