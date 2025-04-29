@@ -6,7 +6,8 @@ import { esbuildPluginBabel } from './esbuildBabel';
 import { Filter, testFilter } from './filter'
 
 export interface BabelPluginOptions {
-	apply?: 'serve' | 'build';
+	apply?: Plugin['apply'];
+	enforce?: Plugin['enforce'];
 	babelConfig?: TransformOptions;
 	filter?: Filter;
 	include?: FilterPattern
@@ -22,6 +23,7 @@ const babelPlugin = ({
 	include,
 	exclude,
 	apply,
+	enforce = 'pre',
 	loader
 }: BabelPluginOptions = {}): Plugin => {
 	const customFilter = createFilter(include, exclude)
@@ -30,7 +32,7 @@ const babelPlugin = ({
 		name: 'babel-plugin',
 
 		apply,
-		enforce: 'pre',
+		enforce,
 
 		config() {
 			return {

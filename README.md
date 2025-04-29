@@ -43,7 +43,8 @@ By default, babel is run for JS/JSX files. You can change that vie `filter` opti
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `apply` | `serve` or `build` | `undefined` | Limits plugin usage to only build or only serve. If not specified, will be run during both cycles. |
+| `apply` | `'serve' \| 'build' \| (config: UserConfig, env: ConfigEnv) => boolean` | `undefined` | Limits plugin usage to only build or only serve. If not specified, will be run during both cycles. Same as [`apply` in Vite Plugins API](https://vite.dev/guide/api-plugin.html#conditional-application) |
+| `enforce` | `'pre' \| 'post'` | `pre` | Force plugin's order execution. More details: [Vite Plugin Ordering](https://vite.dev/guide/api-plugin.html#plugin-ordering) |
 | `babelConfig` | `object` | `{}` | [Babel Transform Options](https://babeljs.io/docs/en/options) |
 | `filter` | `RegExp \| (id: string) => boolean` | `/\.jsx?$/` | Which files is babel applied to. By default, it's js/jsx files. You can pass a filter function that accepts file name and returns `true \| false` |
 | `include` | `string \| RegExp \| Array<string\|RegExp>)` | `undefined` | which files to include. If omitted, all are included |
