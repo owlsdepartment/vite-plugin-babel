@@ -52,7 +52,7 @@ By default, babel is run for JS/JSX files. You can change that vie `filter` opti
 
 ## Tips
 
-Vite team didn't enabled and included Babel by default, because they wanted to keep expirience as fast as possible and esbuild can already do a lot of things, you would probably do with Babel. Because of that, we recommend to only include those Babel plugins you really need. You can use option `babelConfig.plugin` and disable usage of Babel config file, ex.:
+Vite team didn't enable and include Babel by default, because they wanted to keep experience as fast as possible and esbuild can already do a lot of things, you would probably do with Babel. Because of that, we recommend to only include those Babel plugins you really need. You can use option `babelConfig.configFile` and disable usage of Babel config file, ex.:
 
 ```js
 babel({
