@@ -1,37 +1,69 @@
-import esbuild from 'rollup-plugin-esbuild'
-import dts from 'rollup-plugin-dts'
+import esbuild from 'rollup-plugin-esbuild';
+import dts from 'rollup-plugin-dts';
 import { defineConfig } from 'rollup';
 
-type FormatType = 'dts' | 'cjs' | 'esm';
-const EXTENTIONS: Record<FormatType, string> = {
-	cjs: 'cjs',
-	dts: 'd.ts',
-	esm: 'mjs'
-}
+const input = 'index.ts';
+const external = (id: string) => !/^[./]/.test(id);
 
-const bundle = (format: FormatType) => {
-	const ext = EXTENTIONS[format];
-	const file = `dist/index.${ext}`;
+export default defineConfig([
+  {
+    input,
+    output: [
+      {
+        file: `dist/index.cjs`,
+        sourcemap: false,
+        format: 'cjs',
+        exports: 'named',
+      },
+    ],
 
-	return defineConfig({
-		input: 'index.ts',
+    plugins: [esbuild({ target: 'es2020' })],
 
-		output: {
-			file,
+    external,
+  },
+  {
+    input,
+    output: [
+      {
+        file: `dist/index.d.cts`,
+        sourcemap: false,
+        format: 'cjs',
+        exports: 'named',
+      },
+    ],
 
-			sourcemap: false,
-			format: format === 'cjs' ? 'cjs' : 'esm',
-			exports: 'named'
-		},
+    plugins: [dts()],
 
-		plugins: format == 'dts' ? [dts()] : [esbuild({ target: 'es2020' })],
+    external,
+  },
+  {
+    input,
+    output: [
+      {
+        file: `dist/index.mjs`,
+        sourcemap: false,
+        format: 'esm',
+        exports: 'named',
+      },
+    ],
 
-		external: id => !/^[./]/.test(id),
-	})
-}
+    plugins: [esbuild({ target: 'es2020' })],
 
-export default [
-	bundle('cjs'),
-	bundle('esm'),
-	bundle('dts'),
-]
+    external,
+  },
+  {
+    input,
+    output: [
+      {
+        file: `dist/index.d.mts`,
+        sourcemap: false,
+        format: 'esm',
+        exports: 'named',
+      },
+    ],
+
+    plugins: [dts()],
+
+    external,
+  },
+]);
