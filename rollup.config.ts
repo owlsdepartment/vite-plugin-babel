@@ -1,66 +1,43 @@
 import esbuild from 'rollup-plugin-esbuild';
 import dts from 'rollup-plugin-dts';
-import { defineConfig } from 'rollup';
+import { OutputOptions, defineConfig } from 'rollup';
 
 const input = 'index.ts';
 const external = (id: string) => !/^[./]/.test(id);
 
+const getOutput = (format: 'cjs' | 'esm', dts = false): OutputOptions => {
+  const ext = dts ? `${format === 'esm' ? 'd.mts' : 'd.cts'}` : format === 'esm' ? 'mjs' : 'cjs';
+  
+  return {
+    file: `dist/index.${ext}`,
+    sourcemap: false,
+    format,
+    exports: 'named',
+  };
+};
+
 export default defineConfig([
   {
     input,
-    output: [
-      {
-        file: `dist/index.cjs`,
-        sourcemap: false,
-        format: 'cjs',
-        exports: 'named',
-      },
-    ],
-
+    output: getOutput('cjs'),
     plugins: [esbuild({ target: 'es2020' })],
-
     external,
   },
   {
     input,
-    output: [
-      {
-        file: `dist/index.d.cts`,
-        sourcemap: false,
-        format: 'cjs',
-        exports: 'named',
-      },
-    ],
-
+    output: getOutput('cjs', true),
     plugins: [dts()],
-
     external,
   },
-  {
+  { 
     input,
-    output: [
-      {
-        file: `dist/index.mjs`,
-        sourcemap: false,
-        format: 'esm',
-        exports: 'named',
-      },
-    ],
-
+    output: getOutput('esm'),
     plugins: [esbuild({ target: 'es2020' })],
-
     external,
   },
-  {
+  { 
     input,
-    output: [
-      {
-        file: `dist/index.d.mts`,
-        sourcemap: false,
-        format: 'esm',
-        exports: 'named',
-      },
-    ],
+    output: getOutput('esm', true),
 
     plugins: [dts()],
 

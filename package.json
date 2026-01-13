@@ -2,21 +2,18 @@
   "name": "vite-plugin-babel",
   "version": "1.3.2",
   "description": "Runs Babel in Vite during all commands",
-  "type": "commonjs",
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.mjs"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
-      }
+    "import": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
     },
-    "./*": "./dist/*"
+    "require": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    }
   },
   "files": [
     "dist"
