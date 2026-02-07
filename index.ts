@@ -13,6 +13,7 @@ export interface BabelPluginOptions {
 	include?: FilterPattern
 	exclude?: FilterPattern
 	loader?: Loader | ((path: string) => Loader);
+	transformSsr?: boolean;
 }
 
 const DEFAULT_FILTER = /\.jsx?$/;
@@ -26,7 +27,20 @@ const babelPlugin = ({
 	enforce = 'pre',
 	loader
 }: BabelPluginOptions = {}): Plugin => {
-	const customFilter = createFilter(include, exclude)
+	const customFilter = createFilter(include, exclude);
+
+	const optimizeDeps = {
+		esbuildOptions: {
+			plugins: [
+				esbuildPluginBabel({
+					config: { ...babelConfig },
+					customFilter,
+					filter,
+					loader,
+				}),
+			],
+		},
+	};
 
 	return {
 		name: 'babel-plugin',
@@ -36,18 +50,8 @@ const babelPlugin = ({
 
 		config() {
 			return {
-				optimizeDeps: {
-					esbuildOptions: {
-						plugins: [
-							esbuildPluginBabel({
-								config: { ...babelConfig },
-								customFilter,
-								filter,
-								loader,
-							}),
-						],
-					},
-				},
+				optimizeDeps,
+				ssr: transformSsr ? { optimizeDeps } : undefined,
 			};
 		},
 
