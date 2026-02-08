@@ -13,7 +13,7 @@ export interface BabelPluginOptions {
 	include?: FilterPattern
 	exclude?: FilterPattern
 	loader?: Loader | ((path: string) => Loader);
-	transformSsr?: boolean;
+	optimizeOnSSR?: boolean;
 }
 
 const DEFAULT_FILTER = /\.jsx?$/;
@@ -25,11 +25,11 @@ const babelPlugin = ({
 	exclude,
 	apply,
 	enforce = 'pre',
-	loader
+	loader,
+	optimizeOnSSR = false,
 }: BabelPluginOptions = {}): Plugin => {
 	const customFilter = createFilter(include, exclude);
-
-	const optimizeDeps = {
+	const getOptimizeDeps = () => ({
 		esbuildOptions: {
 			plugins: [
 				esbuildPluginBabel({
@@ -40,6 +40,17 @@ const babelPlugin = ({
 				}),
 			],
 		},
+	})
+
+	let root: string | undefined;
+	let babelOptions: object | null;
+
+	const getBabelOptions = () => {
+		if (babelOptions) return babelOptions;
+
+		babelOptions = babel.loadOptions({ cwd: root, root, ...babelConfig });
+
+		return babelOptions;
 	};
 
 	return {
@@ -50,9 +61,13 @@ const babelPlugin = ({
 
 		config() {
 			return {
-				optimizeDeps,
-				ssr: transformSsr ? { optimizeDeps } : undefined,
+				optimizeDeps: getOptimizeDeps(),
+				ssr: optimizeOnSSR ? { optimizeDeps: getOptimizeDeps() } : undefined,
 			};
+		},
+
+		configResolved(config) {
+			root = config.root;
 		},
 
 		transform(code, id) {
@@ -60,8 +75,10 @@ const babelPlugin = ({
 
 			if (!shouldTransform) return;
 
+			const babelOptions = getBabelOptions();
+
 			return babel
-				.transformAsync(code, { filename: id, ...babelConfig })
+				.transformAsync(code, { filename: id, ...babelOptions })
 				.then((result) => ({ code: result?.code ?? '', map: result?.map }));
 		},
 	};

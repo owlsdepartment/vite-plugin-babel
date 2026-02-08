@@ -26,7 +26,7 @@ import babel from 'vite-plugin-babel';
 
 export default defineConfig({
     plugins: [
-        // Babel will try to pick up Babel config files (.babelrc or .babelrc.json)
+        // Babel will try to pick up Babel config files (.babelrc / .babelrc.* / babel.config.*)
         babel(),
         // ...
     ],
@@ -50,22 +50,21 @@ By default, babel is run for JS/JSX files. You can change that vie `filter` opti
 | `include` | `string \| RegExp \| Array<string\|RegExp>)` | `undefined` | which files to include. If omitted, all are included |
 | `exclude` | `string \| RegExp \| Array<string\|RegExp>)` | `undefined` | which files to exclude. If used with `include`, it will have higher priority and can exclude files, that match `include` pattern |
 | `loader` | `Loader` or `(path: string) => Loader` | `undefined` | This tells esbuild how to interpret the contents after babel's transformation. For example, the js loader interprets the contents as JavaScript and the css loader interprets the contents as CSS. The loader defaults to js if it's not specified. See the [Content Types](https://esbuild.github.io/content-types) page for a complete list of all built-in loaders. |
+| `optimizeOnSSR` | `boolean` | `false` | Run dependency optimization during SSR. Could be useful when running a project on a cloud workers, like `@cloudflare/vite-plugin` |
 
 ## Tips
 
-Vite team didn't enable and include Babel by default, because they wanted to keep experience as fast as possible and esbuild can already do a lot of things, you would probably do with Babel. Because of that, we recommend to only include those Babel plugins you really need. You can use option `babelConfig.configFile` and disable usage of Babel config file, ex.:
+Vite team didn't enable and include Babel by default, because they wanted to keep experience as fast as possible and esbuild can already do a lot of things, you would probably do with Babel. Because of that, we recommend to only include those Babel plugins you really need. You can use option `babelConfig.configFile` and omit Babel config file usage:
 
 ```js
 babel({
     babelConfig: {
-        babelrc: false,
-        configFile: false,
         plugins: ['@babel/plugin-proposal-decorators']
     }
 })
 ```
 
-or just use `.babelrc.json`.
+or just use [Babel config file](https://babeljs.io/docs/config-files).
 
 __NOTE:__ Any babel plugins and presets need to be installed seperately and are not included with this package.
 
@@ -82,10 +81,8 @@ import { extname } from 'path';
 // ...
 babel({
     babelConfig: {
-        babelrc: false,
-        configFile: false,
         plugins: ['@babel/plugin-proposal-decorators'],
-        
+
         // uses the jsx loader for .jsx files
         loader: path => {
           if (extname(path) === '.jsx') {
