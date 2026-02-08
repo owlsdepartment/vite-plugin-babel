@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-babel",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Runs Babel in Vite during all commands",
   "type": "module",
   "main": "dist/index.cjs",
