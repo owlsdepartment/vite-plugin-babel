@@ -1,4 +1,4 @@
-import babel, { TransformOptions } from '@babel/core';
+import babel, { PartialConfig, TransformOptions } from '@babel/core';
 import { Loader } from 'esbuild';
 import { createFilter, FilterPattern, Plugin } from 'vite';
 
@@ -43,14 +43,14 @@ const babelPlugin = ({
 	})
 
 	let root: string | undefined;
-	let babelOptions: object | null;
+	let babelPartialConfig: PartialConfig | null;
 
 	const getBabelOptions = () => {
-		if (babelOptions) return babelOptions;
+		if (babelPartialConfig) return babelPartialConfig.options;
 
-		babelOptions = babel.loadOptions({ cwd: root, root, ...babelConfig });
+		babelPartialConfig = babel.loadPartialConfig({ cwd: root, root, ...babelConfig });
 
-		return babelOptions;
+		return babelPartialConfig?.options ?? {};
 	};
 
 	return {
@@ -78,7 +78,7 @@ const babelPlugin = ({
 			const babelOptions = getBabelOptions();
 
 			return babel
-				.transformAsync(code, { filename: id, ...babelOptions })
+				.transformAsync(code, {  ...babelOptions, filename: id })
 				.then((result) => ({ code: result?.code ?? '', map: result?.map }));
 		},
 	};
