@@ -7,12 +7,12 @@
         "noImplicitAny": true,
         "noUnusedLocals": true,
         "module": "ESNext",
-        "moduleResolution": "node",
         "sourceMap": false,
         "outDir": "dist",
         "target": "ES2020",
         "lib": ["ES2020"],
-        "types": ["node"]
+        "types": ["node", "vite/client"],
+        "moduleResolution": "bundler"
     },
 
     "include": ["index.ts", "rollup.config.ts"]
