@@ -1,8 +1,9 @@
 import babel, { PartialConfig, TransformOptions } from '@babel/core';
 import { Loader } from 'esbuild';
-import { createFilter, FilterPattern, Plugin } from 'vite';
+import { createFilter, FilterPattern, Plugin, version as viteVersion } from 'vite';
 
 import { esbuildPluginBabel } from './esbuildBabel';
+import { rolldownPluginBabel } from './rolldownBabel';
 import { Filter, testFilter } from './filter'
 
 export interface BabelPluginOptions {
@@ -29,18 +30,39 @@ const babelPlugin = ({
 	optimizeOnSSR = false,
 }: BabelPluginOptions = {}): Plugin => {
 	const customFilter = createFilter(include, exclude);
-	const getOptimizeDeps = () => ({
-		esbuildOptions: {
-			plugins: [
-				esbuildPluginBabel({
-					config: { ...babelConfig },
-					customFilter,
-					filter,
-					loader,
-				}),
-			],
-		},
-	})
+	const viteMajor = parseInt(viteVersion.split('.')[0], 10);
+
+	const getOptimizeDeps = () => {
+		// Vite 8+ replaced esbuild with Rolldown for dependency pre-bundling.
+		// Use rolldownOptions with a Rolldown-compatible plugin; fall back to
+		// the legacy esbuildOptions for older Vite versions.
+		if (viteMajor >= 8) {
+			return {
+				rolldownOptions: {
+					plugins: [
+						rolldownPluginBabel({
+							config: { ...babelConfig },
+							customFilter,
+							filter,
+						}),
+					],
+				},
+			};
+		}
+
+		return {
+			esbuildOptions: {
+				plugins: [
+					esbuildPluginBabel({
+						config: { ...babelConfig },
+						customFilter,
+						filter,
+						loader,
+					}),
+				],
+			},
+		};
+	}
 
 	let root: string | undefined;
 	let babelPartialConfig: PartialConfig | null;
@@ -86,4 +108,5 @@ const babelPlugin = ({
 
 export default babelPlugin;
 export * from './esbuildBabel';
+export * from './rolldownBabel';
 export type { Filter }
