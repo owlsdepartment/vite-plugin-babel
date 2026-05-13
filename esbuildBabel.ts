@@ -2,7 +2,6 @@ import babel, { TransformOptions } from '@babel/core';
 import { Loader, Plugin, OnLoadArgs, OnLoadResult } from 'esbuild';
 import fs from 'fs';
 import path from 'path';
-import { Filter, testFilter } from './filter';
 
 /**
  * Original: https://github.com/nativew/esbuild-plugin-babel
@@ -10,8 +9,7 @@ import { Filter, testFilter } from './filter';
  */
 export interface ESBuildPluginBabelOptions {
 	config?: TransformOptions;
-	filter?: Filter;
-	customFilter: (id: unknown) => boolean
+	transformFilter: (id: string) => boolean;
 	namespace?: string;
 	loader?: Loader | ((path: string) => Loader);
 }
@@ -20,7 +18,7 @@ export const esbuildPluginBabel = (options: ESBuildPluginBabelOptions): Plugin =
 	name: 'babel',
 
 	setup(build) {
-		const { filter = /.*/, namespace = '', config = {}, loader, customFilter } = options;
+		const { transformFilter, namespace = '', config = {}, loader } = options;
 
 		const resolveLoader = (args: OnLoadArgs): Loader | undefined => {
 			if (typeof loader === 'function') {
@@ -53,12 +51,10 @@ export const esbuildPluginBabel = (options: ESBuildPluginBabelOptions): Plugin =
 					contents: result?.code ?? '',
 					loader: resolveLoader(args),
 				}));
-			};
+		};
 
 		build.onLoad({ filter: /.*/, namespace }, async args => {
-			const shouldTransform = customFilter(args.path) && testFilter(filter, args.path);
-
-			if (!shouldTransform) return;
+			if (!transformFilter(args.path)) return;
 
 			const contents = await fs.promises.readFile(args.path, 'utf8');
 

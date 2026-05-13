@@ -1,6 +1,6 @@
 import babel, { PartialConfig, TransformOptions } from '@babel/core';
 import { Loader } from 'esbuild';
-import { createFilter, FilterPattern, Plugin } from 'vite';
+import { createFilter, FilterPattern, Plugin, UserConfig, version } from 'vite';
 
 import { esbuildPluginBabel } from './esbuildBabel';
 import { Filter, testFilter } from './filter'
@@ -9,49 +9,71 @@ export interface BabelPluginOptions {
 	apply?: Plugin['apply'];
 	enforce?: Plugin['enforce'];
 	babelConfig?: TransformOptions;
+	/**
+	 * @deprecated planned for deprecation in favour of include/exclude as they should be faster
+	 * and this would only accepts functions
+	 */
 	filter?: Filter;
 	include?: FilterPattern
 	exclude?: FilterPattern
+	/**
+	 * not supported for Vite 8+
+	 */
 	loader?: Loader | ((path: string) => Loader);
 	optimizeOnSSR?: boolean;
 }
 
-const DEFAULT_FILTER = /\.jsx?$/;
+const DEFAULT_INCLUDE = /\.jsx?$/;
+const viteMajorVersion = Number(version.split('.')[0]);
 
 const babelPlugin = ({
 	babelConfig = {},
-	filter = DEFAULT_FILTER,
-	include,
+	filter,
+	include = DEFAULT_INCLUDE,
 	exclude,
 	apply,
 	enforce = 'pre',
 	loader,
 	optimizeOnSSR = false,
 }: BabelPluginOptions = {}): Plugin => {
+	const isVite8OrHigher = viteMajorVersion >= 8;
 	const customFilter = createFilter(include, exclude);
-	const getOptimizeDeps = () => ({
-		esbuildOptions: {
-			plugins: [
-				esbuildPluginBabel({
-					config: { ...babelConfig },
-					customFilter,
-					filter,
-					loader,
-				}),
-			],
-		},
-	})
+	const transformFilter = (id: string) => customFilter(id) && testFilter(filter, id);
 
-	let root: string | undefined;
-	let babelPartialConfig: PartialConfig | null;
+	const { getBabelOptions, updateRoot } = useBabelConfig(babelConfig);
 
-	const getBabelOptions = () => {
-		if (babelPartialConfig) return babelPartialConfig.options;
+	const transform: Plugin['transform'] = async (code, id) => {
+		if (!transformFilter(id)) return;
 
-		babelPartialConfig = babel.loadPartialConfig({ cwd: root, root, ...babelConfig });
+		const babelOptions = getBabelOptions();
 
-		return babelPartialConfig?.options ?? {};
-	};
+		return babel
+			.transformAsync(code, { ...babelOptions, filename: id })
+			.then((result) => ({ code: result?.code ?? '', map: result?.map }));
+
+	}
+
+	const getOptimizeDeps = (): UserConfig['optimizeDeps'] => {
+		if (isVite8OrHigher) {
+			return {
+				rolldownOptions: {
+					plugins: [{ name: 'rolldown-plugin-babel', transform }]
+				},
+			}
+		}
+
+		return {
+			esbuildOptions: {
+				plugins: [
+					esbuildPluginBabel({
+						config: { ...babelConfig },
+						transformFilter,
+						loader,
+					}),
+				],
+			},
+		}
+	}
 
 	return {
 		name: 'babel-plugin',
@@ -67,22 +89,41 @@ const babelPlugin = ({
 		},
 
 		configResolved(config) {
-			root = config.root;
+			updateRoot(config.root);
 		},
 
-		transform(code, id) {
-			const shouldTransform = customFilter(id) && testFilter(filter, id);
-
-			if (!shouldTransform) return;
-
-			const babelOptions = getBabelOptions();
-
-			return babel
-				.transformAsync(code, {  ...babelOptions, filename: id })
-				.then((result) => ({ code: result?.code ?? '', map: result?.map }));
-		},
+		transform,
 	};
 };
+
+function useBabelConfig(babelConfig: TransformOptions) {
+	let root: string | undefined;
+	let babelPartialConfig: PartialConfig | null;
+
+	const getBabelOptions = () => {
+		if (babelPartialConfig) return babelPartialConfig.options;
+
+		babelPartialConfig = babel.loadPartialConfig({
+			...babelConfig,
+			cwd: root,
+			root,
+			babelrc: false,
+
+			caller: {
+				name: 'vite-plugin-babel',
+				supportsStaticESM: true,
+				...babelConfig.caller,
+			},
+		});
+	}
+
+	return {
+		getBabelOptions,
+		updateRoot(newRoot: string) {
+			root = newRoot;
+		},
+	}
+}
 
 export default babelPlugin;
 export * from './esbuildBabel';
