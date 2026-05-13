@@ -1,6 +1,8 @@
-import babel, { PartialConfig, TransformOptions } from '@babel/core';
-import { Loader } from 'esbuild';
-import { createFilter, FilterPattern, Plugin, UserConfig, version } from 'vite';
+import type { PartialConfig, InputOptions } from '@babel/core';
+import * as babel from '@babel/core';
+import type { Loader } from 'esbuild';
+import { createFilter, type FilterPattern, type Plugin, type UserConfig, version } from 'vite';
+import type { SourceMapInput, TransformResult } from 'rolldown'
 
 import { esbuildPluginBabel } from './esbuildBabel';
 import { Filter, testFilter } from './filter'
@@ -8,7 +10,7 @@ import { Filter, testFilter } from './filter'
 export interface BabelPluginOptions {
 	apply?: Plugin['apply'];
 	enforce?: Plugin['enforce'];
-	babelConfig?: TransformOptions;
+	babelConfig?: InputOptions;
 	/**
 	 * @deprecated planned for deprecation in favour of include/exclude as they should be faster
 	 * and this would only accepts functions
@@ -42,14 +44,14 @@ const babelPlugin = ({
 
 	const { getBabelOptions, updateRoot } = useBabelConfig(babelConfig);
 
-	const transform: Plugin['transform'] = async (code, id) => {
+	const transform: Plugin['transform'] = async (code, id): Promise<TransformResult | void> => {
 		if (!transformFilter(id)) return;
 
 		const babelOptions = getBabelOptions();
 
 		return babel
 			.transformAsync(code, { ...babelOptions, filename: id })
-			.then((result) => ({ code: result?.code ?? '', map: result?.map }));
+			.then((result): TransformResult => ({ code: result?.code ?? '', map: result?.map as SourceMapInput || null }));
 
 	}
 
@@ -96,14 +98,14 @@ const babelPlugin = ({
 	};
 };
 
-function useBabelConfig(babelConfig: TransformOptions) {
+function useBabelConfig(babelConfig: InputOptions) {
 	let root: string | undefined;
 	let babelPartialConfig: PartialConfig | null;
 
 	const getBabelOptions = () => {
 		if (babelPartialConfig) return babelPartialConfig.options;
 
-		babelPartialConfig = babel.loadPartialConfig({
+		babelPartialConfig = babel.loadPartialConfigSync({
 			...babelConfig,
 			cwd: root,
 			root,

@@ -43,9 +43,8 @@
     "babel"
   ],
   "devDependencies": {
-    "@babel/core": "^7.23.6",
+    "@babel/core": "^8.0.0-rc.5",
     "@rollup/plugin-typescript": "^11.1.5",
-    "@types/babel__core": "^7.20.5",
     "@types/node": "^20.10.4",
     "rollup": "^4.8.0",
     "rollup-plugin-dts": "^6.1.0",
