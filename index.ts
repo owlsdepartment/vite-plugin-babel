@@ -115,6 +115,8 @@ function useBabelConfig(babelConfig: TransformOptions) {
 				...babelConfig.caller,
 			},
 		});
+
+		return babelPartialConfig?.options ?? {};
 	}
 
 	return {
