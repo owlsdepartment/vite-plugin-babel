@@ -10,8 +10,13 @@ export interface BabelPluginOptions {
 	enforce?: Plugin['enforce'];
 	babelConfig?: TransformOptions;
 	/**
-	 * @deprecated planned for deprecation in favour of include/exclude as they should be faster
-	 * and this would only accepts functions
+	 * @deprecated Use `include` / `exclude` instead.
+	 *
+	 * `filter` is combined with `include` as an AND, and since 1.7.0 `include`
+	 * defaults to `/\.jsx?$/`. Files outside that default are filtered out
+	 * before `filter` runs, so passing only `filter` cannot expand the file
+	 * scope. Set `include` explicitly to match your filter, or migrate to
+	 * `include` / `exclude` entirely.
 	 */
 	filter?: Filter;
 	include?: FilterPattern
@@ -37,6 +42,19 @@ const babelPlugin = ({
 	optimizeOnSSR = false,
 }: BabelPluginOptions = {}): Plugin => {
 	const isVite8OrHigher = viteMajorVersion >= 8;
+
+	// Help users migrating from 1.6.x: `filter` is now AND-ed with `include`,
+	// which defaults to `/\.jsx?$/`. If they relied on `filter` alone to scope
+	// to other extensions, those files are silently skipped — surface the
+	// migration path instead of leaving Babel transforms unapplied.
+	if (filter !== undefined && include === undefined) {
+		console.warn(
+			'[vite-plugin-babel] `filter` is applied after `include` (default since 1.7.0: `/\\.jsx?$/`). ' +
+			'Files outside that default are skipped. ' +
+			'Set `include` explicitly to match your filter, or migrate to `include` / `exclude` entirely.'
+		);
+	}
+
 	const customFilter = createFilter(include, exclude);
 	const transformFilter = (id: string) => customFilter(id) && testFilter(filter, id);
 
