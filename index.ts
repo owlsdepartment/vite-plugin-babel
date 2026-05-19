@@ -13,7 +13,7 @@ export interface BabelPluginOptions {
 	 * @deprecated Use `include` / `exclude` instead.
 	 *
 	 * `filter` is combined with `include` as an AND, and since 1.7.0 `include`
-	 * defaults to `/\.jsx?$/`. Files outside that default are filtered out
+	 * defaults to `/\.jsx?$/`. Files outside that default will be filtered out
 	 * before `filter` runs, so passing only `filter` cannot expand the file
 	 * scope. Set `include` explicitly to match your filter, or migrate to
 	 * `include` / `exclude` entirely.
@@ -49,12 +49,12 @@ const babelPlugin = ({
 	// migration path instead of leaving Babel transforms unapplied.
 	if (filter !== undefined && include === undefined) {
 		console.warn(
-			'[vite-plugin-babel] `filter` is applied after `include` (default since 1.7.0: `/\\.jsx?$/`). ' +
-			'Files outside that default are skipped. ' +
+			'[vite-plugin-babel] `filter` option is applied after `include` (default since 1.7.0: `/\\.jsx?$/`) and planned for deprecation. ' +
 			'Set `include` explicitly to match your filter, or migrate to `include` / `exclude` entirely.'
 		);
+	}
 	// Apply default include value for users that never overwritten filter
-	} else if (include === undefined) {
+	if (include === undefined) {
 		include = DEFAULT_INCLUDE;
 	}
 
