@@ -34,7 +34,7 @@ const viteMajorVersion = Number(version.split('.')[0]);
 const babelPlugin = ({
 	babelConfig = {},
 	filter,
-	include = DEFAULT_INCLUDE,
+	include,
 	exclude,
 	apply,
 	enforce = 'pre',
@@ -53,6 +53,9 @@ const babelPlugin = ({
 			'Files outside that default are skipped. ' +
 			'Set `include` explicitly to match your filter, or migrate to `include` / `exclude` entirely.'
 		);
+	// Apply default include value for users that never overwritten filter
+	} else if (include === undefined) {
+		include = DEFAULT_INCLUDE;
 	}
 
 	const customFilter = createFilter(include, exclude);
