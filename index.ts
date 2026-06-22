@@ -1,9 +1,12 @@
-import babel, { PartialConfig, TransformOptions } from '@babel/core';
+import { loadPartialConfigSync, type PartialConfig, transformAsync } from '@babel/core';
 import { Loader } from 'esbuild';
 import { createFilter, FilterPattern, Plugin, UserConfig, version } from 'vite';
 
 import { esbuildPluginBabel } from './esbuildBabel';
 import { Filter, testFilter } from './filter'
+import type { TransformResult } from "rollup";
+
+export type TransformOptions = NonNullable<Parameters<typeof transformAsync>[1]>
 
 export interface BabelPluginOptions {
 	apply?: Plugin['apply'];
@@ -68,9 +71,11 @@ const babelPlugin = ({
 
 		const babelOptions = getBabelOptions();
 
-		return babel
-			.transformAsync(code, { ...babelOptions, filename: id })
-			.then((result) => ({ code: result?.code ?? '', map: result?.map }));
+		return transformAsync(code, { ...babelOptions, filename: id })
+			.then((result) => {
+				// without cast, `map.file` can be null but `transform` expects that to only be undefined
+				return ({ code: result?.code ?? '', map: result?.map }) as TransformResult;
+			});
 
 	}
 
@@ -124,7 +129,7 @@ function useBabelConfig(babelConfig: TransformOptions) {
 	const getBabelOptions = () => {
 		if (babelPartialConfig) return babelPartialConfig.options;
 
-		babelPartialConfig = babel.loadPartialConfig({
+		babelPartialConfig = loadPartialConfigSync({
 			...babelConfig,
 			cwd: root,
 			root,
