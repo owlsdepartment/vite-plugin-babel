@@ -1,7 +1,9 @@
-import babel, { TransformOptions } from '@babel/core';
+import { loadOptionsAsync, transformAsync } from '@babel/core';
 import { Loader, Plugin, OnLoadArgs, OnLoadResult } from 'esbuild';
 import fs from 'fs';
 import path from 'path';
+
+import type { TransformOptions } from "./index";
 
 /**
  * Original: https://github.com/nativew/esbuild-plugin-babel
@@ -28,14 +30,14 @@ export const esbuildPluginBabel = (options: ESBuildPluginBabelOptions): Plugin =
 		};
 
 		const transformContents = async (args: OnLoadArgs, contents: string): Promise<OnLoadResult> => {
-			const babelOptions = babel.loadOptions({
+			const babelOptions = await loadOptionsAsync({
 				filename: args.path,
 				...config,
 				caller: {
 					name: 'esbuild-plugin-babel',
 					supportsStaticESM: true,
 				},
-			}) as TransformOptions;
+			}) as TransformOptions | null;
 
 			if (!babelOptions) {
 				return { contents, loader: resolveLoader(args) };
@@ -45,8 +47,7 @@ export const esbuildPluginBabel = (options: ESBuildPluginBabelOptions): Plugin =
 				babelOptions.sourceFileName = path.relative(process.cwd(), args.path);
 			}
 
-			return babel
-				.transformAsync(contents, babelOptions)
+			return transformAsync(contents, babelOptions)
 				.then((result) => ({
 					contents: result?.code ?? '',
 					loader: resolveLoader(args),
